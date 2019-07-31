@@ -1,0 +1,143 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The concat() method is used to merge two or more arrays. 
+//				   This method does not change the existing arrays, but instead returns a new array.
+
+// MDN Example: Array.concat()
+// 				array.concat([value1[, value2[, ...[, valueN]]]])
+
+// My function signature
+// function concat(array, [value1 [,value2 [,valueN]]]);
+
+function concat(array) {
+	var newArray = [];
+	var numberOfArguments = arguments.length - 1;
+
+	for (var i = 0; i < array.length; i++) {
+		newArray.push(array[i]);
+	}
+
+	if (numberOfArguments > 0) {
+		for (var i = 0; i < numberOfArguments; i++){ // loops through valueN arguments
+			var length = arguments[i + 1].length;
+			var argumentArray = arguments[i + 1];
+
+			// if argument is simple string, number, or boolean datatype, then just add it to the array.
+			if (typeof argumentArray === 'string' || typeof argumentArray === 'number' || typeof argumentArray === 'boolean')
+			{
+				newArray.push(argumentArray);
+			}
+			else{
+				for (var ib = 0; ib < length; ib++) // loops through each element in valueN
+				{
+						newArray.push(argumentArray[ib]);
+				}
+			}
+			
+		}
+	}
+	return newArray;
+};
+
+tests({
+
+  'It should return a new array': function() {
+  	var testArray = [];
+
+  	var result = concat(testArray);
+
+  	eq(testArray === result, false);
+  },
+  'It should NOT mutate existing arrays': function() {
+  	var testArray = [1, 2, 3];
+
+  	concat(testArray);
+
+  	eq(testArray.length, 3);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  },
+  'It should accept infinite arrays/values as parameters': function() {
+  	 var result = concat([1], [1], [1], [[]], [1]);
+
+  	 eq(result.length, 5);
+  },
+  'It no valueN parameters are given, it should return a shallow copy of the array it was called on.': function() {
+  	var testArray = [1, 2, 3, 4];
+
+  	var result = concat(testArray);
+
+  	eq(testArray === result, false);
+  	eq(testArray.length, result.length);
+  	eq(testArray[0], result[0]);
+  	eq(testArray[1], result[1]);
+  	eq(testArray[2], result[2]);
+  	eq(testArray[3], result[3]);
+  },
+  'It should return a new array consisting of the elements of the original array, followed in order by the elements of the arguments given.': function() {
+  	var testArray = [1, 2, 3, 4];
+  	var testValue1 = [5, 6];
+  	var testValue2 = [7, 8];
+
+  	var result = concat(testArray, testValue1, testValue2);
+
+  	eq(result[0], 1);
+  	eq(result[1], 2);
+  	eq(result[2], 3);
+  	eq(result[3], 4);
+  	eq(result[4], 5);
+  	eq(result[5], 6);
+  	eq(result[6], 7);
+  	eq(result[7], 8);
+  },
+  'It should NOT recurse into nested arrays': function() {
+  	var testArray = [1, 2, [3, 4]];
+  	var testValue1 = [5, 6];
+  	var testValue2 = [7, 8];
+
+  	var result = concat(testArray, testValue1, testValue2);
+
+  	eq(result[0], 1);
+  	eq(result[1], 2);
+  	eq(result[2].length, 2);
+  	eq(result[3], 5);
+  	eq(result[4], 6);
+  	eq(result[5], 7);
+  	eq(result[6], 8);
+  },
+  'It should copy the values of strings and numbers into the new array (if data types are given instead of array)': function() {
+  	var testArray = [1, 2, 3];
+  	var testValue1 = 'Hi!';
+  	var testValue2 = 100;
+  	var testValue3 = true;
+
+  	var result = concat(testArray, testValue1, testValue2, testValue3);
+
+  	eq(result[3], 'Hi!');
+  	eq(result[4], 100);
+  	eq(result[5], true);
+  },
+
+  'Any operation on the new array (except operations on elements which are object references) will have no effect on the original arrays, and vice versa.': function() {
+  	var testArray = [1, 2, [3, 4]];
+  	var testValue1 = [5, 6];
+  	var testValue2 = [7, 8];
+
+  	var result = concat(testArray, testValue1, testValue2);
+
+  	// test if changing result array changes original test array (IT SHOULDN'T)
+  	result[0] = 100;
+  	eq(testArray[0], 1);
+
+  	// test if changing testValue2 array changes result array (IT SHOULDN'T)
+  	testValue2[0] = 100;
+  	eq(result[5], 7); 
+  	
+  	// test if changing object reference has effect on concated array (IT SHOULD)
+  	testArray[2].push(3);
+  	eq(result[2].length, 3);
+  }
+});
+</script>

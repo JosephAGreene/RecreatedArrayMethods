@@ -1,0 +1,135 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Defintion: The includes() method determines whether an array includes a certain value among its entries, 
+//				  returning true or false as appropriate.
+
+// MDN Example: Array.includes()
+// 				arr.includes(valueToFind[, fromIndex])
+
+// My function signature
+// function includes (array, valueToFind [, fromIndex]){};
+
+
+function includes (array, valueToFind, fromIndex){
+	var startingIndex = 0;
+
+	if(fromIndex > 0){
+		startingIndex = fromIndex;
+	}
+	if(fromIndex < 0){
+		if(array.length + fromIndex <= -1){
+			//If computed index is -1 or less, use defualt starting index. 
+			//This isn't necessary to make function work, but it cuts out unecessary 
+			//for looping.
+		}
+		else{
+			startingIndex = array.length + fromIndex;
+		}
+	}
+
+	for (var i = startingIndex; i < array.length; i++){
+		if(array[i] === valueToFind || Object.is(array[i], valueToFind)){
+			return true;
+		}
+	}
+
+	return false;
+};
+
+tests({
+  'It should return a boolean.': function() {
+  	var testArray = [];
+
+  	var result = includes(testArray, 3);
+
+  	eq(typeof result === 'boolean', true);
+  },
+  'It should return True if valueToFind exists in array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = includes(testArray, 3);
+
+  	eq(result, true);
+  },
+  'It should return False if valueToFind does NOT exist in array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = includes(testArray, 'hi!');
+
+  	eq(result, false);
+  },
+  'It should be case-sensitive when comparing strings and characters': function() {
+  	var testArray = ['hello', 'dOg'];
+
+  	var result1 = includes(testArray, 'Hello');
+  	var result2 = includes(testArray, 'dOg');
+  	var result3 = includes(testArray, 'dog');
+
+  	eq(result1, false);
+  	eq(result2, true);
+  	eq(result3, false);
+  },
+  'It should start searching the array at position fromIndex if fromIndex is positive.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result1 = includes(testArray, 3, 2);
+  	var result2 = includes(testArray, 3, 3);
+
+  	eq(result1, true);
+  	eq(result2, false);
+  },
+  'It should start searching the array at at the computed index (array.length + fromIndex) if fromIndex is negative.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result1 = includes(testArray, 3, -2);
+  	var result2 = includes(testArray, 3, -3);
+
+  	eq(result1, false);
+  	eq(result2, true);
+  },
+  'If the computed index is less than or equal to -1, the entire array will be searched.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = includes(testArray, 1, -6);
+
+  	eq(result, true);
+  },
+  'If fromIndex is greater than or equal to array.length, false should be returned.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = includes(testArray, 5, testArray.length);
+
+  	eq(result, false);
+  },
+  'It should consider values of zero the same (i.e. -0, 0, +0 are equal).': function() {
+  	var testArray1 = [-0, 1, 2, 3, 4];
+  	var testArray2 = [+0, 1, 2, 3, 4];
+
+  	var result1 = includes(testArray1, 0);
+  	var result2 = includes(testArray1, +0);
+  	var result3 = includes(testArray2, -0);
+
+  	eq(result1, true);
+  	eq(result2, true);
+  	eq(result3, true);
+  },
+  'False is not equal to 0.': function() {
+  	var testArray = [false];
+
+  	var result = includes(testArray, 0);
+
+  	eq(result, false);
+  }, 
+  'It should be able to distinguish value NaN': function (){
+  	var testArray = [1, 2, NaN];
+  	var testArray2 = ['hello', 2, 3];
+
+  	var result = includes(testArray, NaN);
+  	var result2 = includes(testArray2, NaN);
+
+  	eq(result, true);
+  	eq(result2, false);
+  }
+});
+</script>

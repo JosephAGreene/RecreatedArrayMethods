@@ -1,0 +1,84 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The shift() method removes the first element from an array and returns that removed element. 
+// 				   This method changes the length of the array.
+
+// MDN Example: Array.shift()
+//				arr.shift()
+
+// My function signature
+// function shift(array){};
+
+function shift(array){
+	var firstElement = array[0];
+
+	if(array.length === 0){
+		return undefined;
+	}
+
+	delete array[0];
+
+	for (var i = 0; i < array.length; i++){
+		array[i] = array[i+1];
+	}
+	
+	array.length --;
+	return firstElement;
+};
+
+tests({
+  'It should remove the first element from an array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	shift(testArray);
+
+  	eq(testArray[0] !== 1, true);
+  },
+  'It should change the length of the array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	shift(testArray);
+
+  	eq(testArray.length, 4);
+  },
+  'It should return the element that was removed.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = shift(testArray);
+
+  	eq(result, 1);
+  },
+  'It should return undefined if the array was empty (array.length === 0).': function() {
+  	var testArray = [];
+
+  	var result = shift(testArray);
+
+  	eq(result, undefined);
+  },
+  'It should shift the values of consecutive indexes down.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	shift(testArray);
+
+  	eq(testArray[0], 2);
+  	eq(testArray[1], 3);
+  	eq(testArray[2], 4);
+  	eq(testArray[3], 5);
+  },
+  'It should work on array like objects': function() {
+  	var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    var result = shift(arrayLikeObj);
+
+    eq(arrayLikeObj.length, 2);
+    eq(result, 'first');
+    eq(arrayLikeObj[0], true);
+    eq(arrayLikeObj[1], 'last!');
+  }
+});
+</script>

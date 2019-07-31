@@ -1,0 +1,96 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The unshift() method adds one or more elements to the beginning of an array 
+// 				   and returns the new length of the array.
+
+// MDN Example: Array.unshift()
+// 				arr.unshift(element1[, ...[, elementN]])
+
+// My function signature
+// function unshift(array){};
+
+function unshift(array){
+	var shiftAmount = arguments.length - 1;
+	var lastIndex = array.length - 1 + shiftAmount;
+	array.length = array.length + arguments.length -1;
+
+	// Shift original elements right by number of parameters given
+	for (var i = lastIndex; i > 0; i--){
+			array[i] = array[i - shiftAmount];	
+	}
+	
+	// Add new element parameters in array left to right
+	for (var i = 0; i < shiftAmount; i++){
+		array[i] = arguments[i + 1];
+	}
+
+	return array.length;
+};
+
+tests({
+  'It should add element(s) to the beginning of an array.': function() {
+  	var testArray = [4, 5, 6];
+
+  	unshift(testArray, 1, 2, 3);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+  	eq(testArray[5], 6);
+  },
+  'It should return the new length of the array': function() {
+  	var testArray = [4, 5, 6];
+
+  	var result = unshift(testArray, 1, 2, 3);
+
+  	eq(result, 6);
+  },
+  'It should insert multiple parameters in "chunks" at the beginning of the array': function() {
+  	var testArray = [4, 5, 6];
+
+  	unshift(testArray, 1, 2, 3);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+  	eq(testArray[5], 6);
+
+  	// Below is testing new values unshifted 1 by 1
+  	var testOne = [4, 5, 6];
+
+  	unshift(testOne, 1);
+  	unshift(testOne, 2);
+  	unshift(testOne, 3);
+
+  	eq(testOne[0], 3);
+  	eq(testOne[1], 2);
+  	eq(testOne[2], 1);
+  	eq(testOne[3], 4);
+  	eq(testOne[4], 5);
+  	eq(testOne[5], 6);
+
+  },
+  'It should work on array like objects': function() {
+  	var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    unshift(arrayLikeObj, 1, 2, 3);
+
+    eq(arrayLikeObj.length, 6);
+    eq(arrayLikeObj[0], 1);
+    eq(arrayLikeObj[1], 2);
+    eq(arrayLikeObj[2], 3);
+    eq(arrayLikeObj[3], 'first');
+    eq(arrayLikeObj[4], true);
+    eq(arrayLikeObj[5], 'last!');
+  }
+});
+</script>

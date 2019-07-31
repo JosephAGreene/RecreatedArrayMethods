@@ -1,0 +1,204 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The splice() method changes the contents of an array by removing 
+//				   or replacing existing elements and/or adding new elements in place.
+
+// MDN Example: Array.splice()
+//				array.splice(start[, deleteCount[, item1[, item2[, ...]]]])
+
+// My function Signature
+//function splice (array, start[, deleteCount[, item1[, item2[, ....]]]]);
+
+// MDN stated that the splice algo is done "in-place". I don't know how to test for 
+// that, but I believe this meets the criteria. 
+
+function splice(array, start, deleteCount){
+	var deletedArray = [];
+	var startingIndex = 0;
+	var numberOfValues = 0;
+
+	//If start parameter was provided.
+	if(arguments.length > 1){
+		if(start > array.length){
+			startingIndex = array.length;
+		} else if ((start < 0) && (start + array.length < 0)) {
+			// let startingIndex remain at deault 0
+		} else if (start < 0) {
+			startingIndex = start + array.length;
+		} else {
+			startingIndex = start;
+		}
+	}
+
+	// Initialize numberToDelete as default to remaining elements
+	// in array past the startingIndex
+	var numberToDelete = array.length - startingIndex;
+	
+	//If deleteCount parameter was provided
+	if(arguments.length > 2){
+		if(deleteCount <= 0){
+			 numberToDelete = 0;
+		} else if (deleteCount > 0){
+			if (deleteCount + startingIndex > array.length){
+				numberToDelete = array.length - startingIndex;
+			} else {
+				numberToDelete = deleteCount;
+			}
+		}
+	}
+
+	//If any values to add to the array were provided, 
+	//set numberOfValue to the number of values provided.
+	if(arguments.length > 3){
+		numberOfValues = arguments.length - 3;
+	}
+	
+	var endingIndex = startingIndex + numberToDelete; 
+	var endingLength = array.length - numberToDelete + numberOfValues;
+	
+	// loops through array from startingIndex to endingIndex and adds array[i] element
+	// to the deletedArray for each loop. If a number to delete was provided, then the elements
+	// that remain after deleting are shifted left (i.e. no gaps in midded of array, only end)
+	for (var i = startingIndex; i < endingIndex; i++){
+		deletedArray.push(array[i]);
+
+		if(numberToDelete >  0){	
+		array[i] = array[numberToDelete + i];
+		}
+	}
+
+	// If numberOfValues is greater than 0, then move all elements in array right
+	// from the starting index by the number of values provided and insert provided values
+	// into the gap in the array created.
+	var valueCounter = 0;
+	for (var i = startingIndex; i < startingIndex + numberOfValues; i++){
+		array[i + numberOfValues] = array[i];
+		array[i] = arguments[valueCounter + 3];
+		valueCounter++;
+	};
+	
+	// Reset array length. This is needed in scenarios where the number of elements deleted
+	// is not equal to the number of values provided.
+	array.length = endingLength;
+
+	return deletedArray;
+};
+
+tests({
+  'It should return a new array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray);
+
+  	eq(testArray != result, true);
+  },
+  'It should return a new array containing the deleted elements.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 3);
+
+  	eq(result.length, 2);
+  	eq(result[0], 4);
+  	eq(result[1], 5);
+  },
+  'It should mutate that array on which it is called.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 4);
+
+  	eq(testArray.length, 4);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  },
+  'If no elements are deleted, an empty array is returned.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 5);
+
+  	eq(testArray.length, 5);
+  	eq(result.length, 0);
+  },
+  'If given start value is greater than array.length, start value will be set to array.length.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 100);
+
+  	eq(testArray.length, 5);
+  	eq(result.length, 0);
+  },
+  'If given start value is negative, start value will be set to (start value + array.length).': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, -1);
+
+  	eq(testArray.length, 4);
+  	eq(result.length, 1);
+  },
+  'If given start value is negative AND (start value + array.length) is negative, then start value is set to zero.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, -20);
+
+  	eq(testArray.length, 0);
+  	eq(result.length, 5);
+  },
+  'If deleteCount is omitted, then all elements from start value on will be deleted.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 3);
+
+  	eq(testArray.length, 3);
+  	eq(result.length, 2);
+  },
+  'If deleteCount value is equal to or greater than (array.length - start), then all elements from start value on will be deleted. ': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 3, 5);
+
+  	eq(testArray.length, 3);
+  	eq(result.length, 2);;
+  },
+  'If deleteCount is 0 or negative, no elements will be removed.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 3, 0);
+
+  	eq(testArray.length, 5);
+  	eq(result.length, 0);;
+  },
+  'It should delete the deleteValue amount of elements in the array starting from the start value.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 1, 2);
+
+  	eq(result.length, 2);
+  	eq(testArray.length, 3);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 4);
+  	eq(testArray[2], 5);
+  },
+  'If item values are given, it should add those items to the array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = splice(testArray, 2, 2, 'thing 1', 'thing 2');
+
+  	eq(testArray.length, 5);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 'thing 1');
+  	eq(testArray[3], 'thing 2');
+  	eq(testArray[4], 5);
+  },
+  'If the number of elements to insert differs from the number of elements beind removed, the arrays length will change.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var originalLength = testArray.length;
+
+  	var result = splice(testArray, 5, 0, 'thing 1', 'thing 2', 'thing 3', 'thing 4');
+
+  	eq(testArray.length != originalLength, true);
+  }
+});
+</script>

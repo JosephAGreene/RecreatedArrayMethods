@@ -1,0 +1,111 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The push() method adds one or more elements to the end of an array 
+// 				and returns the new length of the array.
+
+// MDN Example: Array.push()
+//			      	arr.push(element1[, ...[, elementN]])
+
+// My function signature
+// function push(element1[,...[, elementN]]);
+
+function push (array){
+  var modifiedArray = array;
+  
+  if(!modifiedArray.length){
+    modifiedArray.length = 0;
+  }
+
+  var originalLength = modifiedArray.length;
+  var endingIndex = (arguments.length - 1);
+
+  for (var i = 0; i < endingIndex; i++){
+    modifiedArray[originalLength + i] = arguments[i + 1];
+  }
+
+  // this is probably hacky, but used to set array like object length property
+  if(!Array.isArray(modifiedArray)){
+    modifiedArray.length = Object.keys(modifiedArray).length -1;
+  }
+   
+  return modifiedArray.length;
+};
+
+
+tests({
+  'It should return the new length of the array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+    var result = push(testArray);
+
+    eq(testArray.length, result);
+  },
+  'It should add the given element to the end of the array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+    var result = push(testArray, 6);
+
+    eq(testArray[5], 6);
+    eq(testArray.length, 6);
+  },
+  'It should accept infinite element parameters and add them to the end of the array.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+    var result = push(testArray, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17);
+
+    eq(testArray[5], 6);
+    eq(testArray[6], 7);
+    eq(testArray[7], 8);
+    eq(testArray[8], 9);
+    eq(testArray[9], 10);
+    eq(testArray[10], 11);
+    eq(testArray[11], 12);
+    eq(testArray[12], 13);
+    eq(testArray[13], 14);
+    eq(testArray[14], 15);
+    eq(testArray[15], 16);
+    eq(testArray[16], 17);
+  },
+  'If length cannot be converted a number, it should start at index 0.': function() {
+  	var testArray = [];
+
+    var result = push(testArray, 1, 2, 3);
+
+    eq(testArray[0], 1);
+    eq(testArray[1], 2);
+    eq(testArray[2], 3);
+  },
+  'It should work on an array type object.': function() {
+  	 var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    var result = push(arrayLikeObj, 1, 2, 3);
+
+    eq(arrayLikeObj[3], 1);
+    eq(arrayLikeObj[4], 2);
+    eq(arrayLikeObj[5], 3);
+  },
+  'It should also increase the length property of an array type object.': function() {
+  	 var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    var result = push(arrayLikeObj, 1, 2, 3);
+
+    eq(arrayLikeObj.length, 6);
+  },  
+  'If array like object length does not exist, it will be created with a value of 0.': function() {
+    var arrayLikeObj = {};
+
+    var result = push(arrayLikeObj);
+
+    eq(arrayLikeObj.length, 0);
+  }
+});
+</script>

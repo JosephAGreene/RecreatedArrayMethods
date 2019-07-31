@@ -1,0 +1,80 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The lastIndexOf() method returns the last index at which a given element can be found in the array, 
+//				    or -1 if it is not present. The array is searched backwards, starting at fromIndex. 
+
+// MDN Example: Array.lastIndexOf()
+// 				arr.lastIndexOf(searchElement[, fromIndex])
+
+// My function signature
+// function lastIndexOf(array, searchElement[, fromIndex]){};
+
+function lastIndexOf(array, searchElement, fromIndex){
+	var startingIndex = array.length - 1;
+
+	if(fromIndex > array.length -1){
+		// stick with default startingIndex because fromIndex unnecessarily high	
+	}
+	else if(fromIndex > 0){
+		startingIndex = fromIndex;
+	}
+	else if(fromIndex < 0){
+		startingIndex = array.length + fromIndex;
+	}
+
+	for (var i = startingIndex; i >= 0; i--) {
+		if(array[i] === searchElement) {
+			return i;
+		}
+	}
+	return -1;
+};
+
+tests({
+  'It should return the last index at which searchElement is found in the array.': function() {
+  	var testArray = [1, 2, 3, 3, 2];
+
+  	result = lastIndexOf(testArray, 2);
+
+  	eq(result, 4);
+  },
+  'It should return -1 if the element is not present.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	result = lastIndexOf(testArray, 6);
+
+  	eq(result, -1);
+  },
+  'It should search the array from right to left, starting at fromIndex.': function() {
+  	var testArray = [3, 3, 3, 4, 3];
+
+  	result = lastIndexOf(testArray, 3, 3);
+
+  	eq(result, 2);
+  },
+  'If fromIndex is greater than or equal to array.length, the entire array will be search.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	result = lastIndexOf(testArray, 1, 6);
+  	result2 = lastIndexOf(testArray, 5, 20);
+  	
+  	eq(result, 0);
+  	eq(result2, 4);
+  },
+  'If fromIndex is negative, it is taken as the offset from the end of the array.': function() {
+  	var testArray = [1, 2, 2, 2, 5];
+
+  	result = lastIndexOf(testArray, 2, -2);
+
+  	eq(result, 3);
+  },
+  'If the calculated index (array.length + fromIndex) is less than 0, -1 is returned.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	result = lastIndexOf(testArray, 2, -5);
+
+  	eq(result, -1);
+  }
+});
+</script>

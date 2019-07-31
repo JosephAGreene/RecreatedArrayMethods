@@ -1,0 +1,134 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The find() method returns the value of the first element in the array that satisfies the provided testing function. 
+//                 Otherwise undefined is returned.
+
+// MDN Example: Array.prototype.find()
+//			    arr.find(callback(element[, index[, array]])[, thisArg])
+
+
+// My function signature
+// function find(array, callback [, optionalThis]) {
+// 	callback(element [, index [, array]]);
+// };
+
+
+function find(array, callback, optionalObject) {
+	var arrayLength = array.length;
+	var findCallback = callback;
+
+	if(optionalObject) {
+		findCallback.bind(optionalObject);
+	}
+
+	for (var i = 0; i < arrayLength; i++) {
+		if (findCallback(array[i], i, array)) {
+			return array[i];
+		}
+	}
+	return undefined;
+};
+
+tests({
+  'It should pass in the ith element as the first argument to the callback.': function() {
+  		find([1], function (element) {
+	  		eq(element, 1);
+	  	});
+  },
+  'It should pass in an ith position of the array as the  second argument to the callback.': function() {
+  		find([1], function (element, position) {
+			eq(position, 0);
+		});
+  },
+  'It should pass in the original array as the third agument to the callback.': function() {
+  		var testArray = [1, 2, 3];
+  		find(testArray, function (element, position, originalArray) {
+  			eq(testArray, originalArray);
+  		});
+  },
+    'It should run callback array.length times if NO elements pass test': function () {
+  		var testArray = [1, 2, 3, 4, 5, 6];
+  		var testArrayLength = testArray.length;
+  		var callbackCounter = 0;
+  		find(testArray, function(element) {
+  			callbackCounter ++;
+  			return element > 10;
+  		});
+  		eq(testArrayLength, callbackCounter);
+  },
+    'It should run callback even on indexes with no value': function () {
+  		var testArray = [, , , 4, 5, undefined];
+  		var testArrayLength = testArray.length;
+  		var callbackCounter = 0;
+  		find(testArray, function() {
+  			callbackCounter ++;
+  		});
+  		eq(testArrayLength, callbackCounter);
+  },
+  'It should find the first element in the array that passes callback test and return that element.': function() {
+  		var testValue = 0;
+  		var testArray = [1, 3, 2];
+  		var test = find(testArray, function(element){
+  					return element > testValue;
+  				   });
+  		eq(test, 1);
+  },
+  'It should return undefined if no elements pass callback test.': function() {
+  		var testValue = 4;
+  		var testArray = [1, 3, 2];
+  		var test = find(testArray, function(element){
+  					return element > testValue;
+  				   });
+  		eq(test, undefined);
+  },
+  'It should accept an optionalThis': function() {
+  		find([], function() {
+    		eq(this.description, 'This is an optional object');
+    	}, {description: 'This is an optional object'});
+  },
+  'It should NOT change the original array': function() {
+		var originalArray = [1, 5, 10];
+		find(originalArray, function() {});
+		eq(originalArray.length, 3);
+		eq(originalArray[0], 1);
+		eq(originalArray[1], 5);
+		eq(originalArray[2], 10);
+  },
+  'It should NOT run on elements that are appended to the array after the call to find begins': function () {
+  		var testArray = [1, 2, 3, 4, 5];
+  		var callbackCounter = 0;
+  		find(testArray, function(element, position, array) {
+  			testArray.push(8);
+  			callbackCounter ++;
+  			return element === 8;
+  		});
+  		eq(testArray[5], 8);
+  		eq(callbackCounter, 5);
+  },
+  'It should visit elements even after they have been deleted': function () {
+  		var testArray = [1, 2, 3, 4, 5];
+  		var callbackCounter = 0;
+  		find(testArray, function(element, position, array){
+  			if (position === 0) {
+  				delete testArray[3];
+  			}
+  			callbackCounter ++;
+  		});
+
+  		eq(testArray.length, callbackCounter);
+  		eq(testArray[3], undefined);
+  },
+  'If an existing and unvisted element is changed by callback, then its value will be the given value at the time find visits its index': function () {
+  		var testArray = [1, 2, 3, 4, 5];
+  		var callbackCounter = 0;
+  		find(testArray, function(element, position, array){
+  			if (position === 0) {
+  				testArray.splice(3, 1, 'four');
+  			}
+  		});
+  		eq(testArray[3], 'four');
+  } 
+
+});
+</script>

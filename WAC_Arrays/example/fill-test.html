@@ -1,0 +1,151 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The fill() method fills (modifies) all the elements of an array from a start index (default zero) 
+//				   to an end index (default array length) with a static value. It returns the modified array.
+
+// MDN Example: Array.fill()
+//				arr.fill(value[, start[, end]])
+
+// My function signature
+// function fill(array, value[, start[, end]]);
+
+function fill(array, value, start, end){
+	var modifiedArray = array;
+	var newValue = value;
+	var startingIndex = 0;
+	var endingIndex = array.length;
+
+	// if start value given
+	if(start){
+		if(start < 0){ 
+			startingIndex = array.length + start; // set startingIndex if start value is negative
+		} else {
+			startingIndex = start; // set startingIndex if start value is 0 or greater
+		}
+	}
+
+	// if end value exists and it's less than or equal to array.length
+	if(end && end <= array.length){ 
+		if(end < 0){
+			endingIndex = array.length + end; // set endingIndex if end value is negative
+		} else {
+			endingIndex = end; // set endingIndex if end value is 0 or greater
+		}
+	}
+
+	for (var i = startingIndex; i < endingIndex; i++){
+		modifiedArray[i] = newValue;
+	}
+
+	return modifiedArray;
+};
+
+tests({
+  'It should return a modified array.': function() {
+  	var testArray = [1, 2, 3];
+
+  	var result = fill(testArray, 'modded!');
+
+  	eq(result, testArray);
+  },
+  'It should change elements of an array to the given value. (startingIndex default 0) & (endingIndex default array.length)': function() {
+  	var testArray = [1, 2, 3];
+
+  	fill(testArray, 'modded!');
+
+  	eq(testArray[0], 'modded!');
+  	eq(testArray[1], 'modded!');
+  	eq(testArray[2], 'modded!');
+  },
+  'It should change elements of an array starting at a given starting index.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	fill(testArray, 'modded!', 2);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 'modded!');
+  	eq(testArray[3], 'modded!');
+  	eq(testArray[4], 'modded!');
+  },
+  'It should change elements of an array up to a given ending index.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	fill(testArray, 'modded!', 2, 4);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 'modded!');
+  	eq(testArray[3], 'modded!');
+  	eq(testArray[4], 5);
+  },
+  'If starting index is negative, then starting index is array.length + starting Index.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	fill(testArray, 'modded!', -2);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 'modded!');
+  	eq(testArray[4], 'modded!');
+  },
+  'If ending index is negative, then ending index is array.length + ending Index.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	fill(testArray, 'modded!', 0, -2);
+
+  	eq(testArray[0], 'modded!');
+  	eq(testArray[1], 'modded!');
+  	eq(testArray[2], 'modded!');
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+  },
+  'It should work on array like objects.': function() {
+  	var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    fill(arrayLikeObj, 'modded!');
+
+    eq(arrayLikeObj[0], 'modded!');
+    eq(arrayLikeObj[1], 'modded!');
+    eq(arrayLikeObj[2], 'modded!');
+  },
+  'If value is an object, it should fill the array with references to that object.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var testObjValue = ['one', 'two'];
+
+  	fill(testArray, testObjValue, 3);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], testObjValue);
+  	eq(testArray[4], testObjValue);
+
+  	testArray[3] = 'Swap';
+  	testObjValue[1] = 'modded!';
+
+  	eq(testArray[3], 'Swap');
+  	eq(testArray[4][1], 'modded!');
+  	eq(testObjValue[1], 'modded!');
+  },
+  'If end value is larger than array.length, let end remain at default value': function () {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	fill(testArray, 'modded!', 0, 100);
+
+  	eq(testArray.length, 5);
+  	eq(testArray[0], 'modded!');
+  	eq(testArray[1], 'modded!');
+  	eq(testArray[2], 'modded!');
+  	eq(testArray[3], 'modded!');
+  	eq(testArray[4], 'modded!');
+  	eq(testArray[5], undefined);
+  }
+});
+</script>

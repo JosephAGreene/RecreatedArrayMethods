@@ -1,0 +1,159 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The some() method tests whether at least one element in the array passes the test implemented by the provided function. 
+//				   It returns a Boolean value. 
+
+// MDN Example: Array.some()
+//				arr.some(callback(element[, index[, array]])[, thisArg])
+
+// My function signature
+// function some(array, callback, [, thisArg]){
+// 	callback(element [, index [, array]]);
+// };
+
+function some (array, callback, optionalThis){
+	var arrayLength = array.length;
+	var someCallback = callback;
+
+	if(optionalThis){
+		someCallback = callback.bind(optionalThis);
+	}
+
+	for (var i = 0; i < arrayLength; i++){
+		if(i in array) // Ignore non-existing indexes
+		{ 
+	   if(someCallback(array[i], i, array)) {
+			return true;
+		}
+   }
+	}
+	
+	return false;
+};
+
+
+tests({  
+  'It should pass in the ith element as the first argument to the callback.': function() {
+	some([1], function (element) {
+		eq(element, 1);
+	});
+  },
+  'It should pass in the ith index as the second argument to the callback': function() {
+  	some([1], function (element, position) {
+		eq(position, 0);
+	});
+  },
+  'It should pass in the original array as the third argument to the callback': function() {
+  	var testArray = [1, 2, 3];
+
+  	some(testArray, function (element, position, array) {
+		eq(testArray, array);
+	});
+  },
+  'It should accept an optional this object.': function() {
+	some([], function() {
+		eq(this.description, 'This is an optional object');
+	}, {description: 'This is an optional object'});
+  },
+  'It should run the callback array.length times IF no element passes test.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+
+  	some (testArray, function (element){
+  		callbackCounter ++;
+  		return element > 5;
+  	});
+
+  	eq (testArray.length, callbackCounter);
+  },
+  'It should return true if at least one element in the array passes test.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var someTest = some(testArray, function (element){
+  		return element === 5;
+  	});
+
+  	eq(someTest, true);
+  },
+  'It should return false if no elements in the array pass test.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var someTest = some(testArray, function (element){
+  		return element === 6;
+  	});
+
+  	eq(someTest, false);
+  },
+  'It should return false if the array is empty.': function() {
+  	var testArray = [];
+
+  	var someTest = some(testArray, function (element){
+  		return element > 5; // every function should basically ignore this test because testArray is empty.
+  	});
+
+  	eq(someTest, false);
+  },
+  'It should invoke callback ONLY for indexes with assigned values.': function() {
+  	var testArray = [undefined, 2, 3, ,5];
+  	var callbackCounter = 0;
+
+  	some(testArray, function(){
+  		callbackCounter ++;
+  		return false;
+  	});
+
+  	eq(callbackCounter, 4);
+  },
+  'It should NOT invoke callback on elements in the array that have been deleted.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	some(testArray, function(element, position, array){
+  		if (position === 0) {
+  			delete testArray[3];
+  		}
+  		callbackCounter ++;
+  		return false;
+  	});
+
+  	eq(callbackCounter, 4);
+  	eq(testArray[3], undefined);
+  },
+  'It should NOT mutate the array on which it is called.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	some(testArray, function(){});
+
+  	eq(testArray.length, 5);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+  },
+  'It should NOT invoke callback on elements that are appended after some is called.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	some(testArray, function() {
+  		testArray.push(8);
+  		callbackCounter ++;
+  		return false;
+  	});
+  	
+  	eq(testArray[5], 8);
+  	eq(callbackCounter, 5);
+  },
+  'If an existing and unvisted element is changed by callback, then its value will be the given value at the time find visits its index.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	some(testArray, function(element, position){
+  		if (position === 0) {
+  			testArray.splice(3, 1, 'four');
+  		}
+  		return false;
+  	});
+
+  	eq(testArray[3], 'four');
+  }
+});
+</script>

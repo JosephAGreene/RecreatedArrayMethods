@@ -1,0 +1,175 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The sort() method sorts the elements of an array in place and returns the sorted array. 
+// 				   The default sort order is built upon converting the elements into strings, then comparing 
+// 				   their sequences of UTF-16 code units values.
+
+// MDN Example: Array.sort()
+// 				arr.sort([compareFunction])
+
+// My funtion signature
+// function sort (array[, compareFunction]);
+
+// Requirements I cannot test for?
+// Sort algorithm should be done in place. I believe this has been accomplished, but I don't know how to prove it.
+// If compareFunction(a, b) is less than 0, sort "a" to an index lower than "b". --> This is true. 
+// If compareFunction(a, b) is 0, do nothing with "a" & "b" in releation to each other.. -->  This is true.
+// If compareFunction(a, b) is greater than 0, sort a "b" to an index lower than "a". --> This is uneccessary in my algo I believe, as aIndex will alway be lower than bIndex.
+// compareFunction(a, b) must ALWAYS return the same value when given a specific pair of elements.
+
+function sort (array, compareFunction){
+
+// If callback function is provided
+if(arguments.length > 1){
+	// Loop through all elements in array. This is used to grab elementA for comparisons.
+	for (var a = 0; a < array.length; a++){
+
+	// Nested loop that starts at elementA + 1 index. This is used to grab elementB for comparisons.
+		for (var b = a + 1; b < array.length; b++){
+			
+			// If current element is undefined, move it right without using callback
+			if(array[a] === undefined){ 
+			var flip = array[a];
+			var flop = array[b];
+			array[a] = flop;
+			array[b] = flip;
+			} 
+			// If callback returns a positive number, flip elementA and elementB
+			else if (compareFunction(array[a], array[b]) > 0){
+			var flip = array[a];
+			var flop = array[b];
+			array[a] = flop;
+			array[b] = flip;
+			} 
+		}
+	}
+} 
+//If callback function is NOT provided
+else {
+	// Loop through all elements in array. This is used to grab elementA for comparisons.
+	for (var a = 0; a < array.length; a++){
+		// Nested loop that starts at elementA + 1 index. This is used to grab elementB for comparisons.
+		for (var b = a + 1; b < array.length; b++){
+			// If String value of elementA is greater than String value of elementB, OR elementA is undeined - flip elements.
+			if (String(array[a]) > String(array[b]) || array[a] === undefined){
+			var flip = array[a];
+			var flop = array[b];
+			array[a] = flop;
+			array[b] = flip;
+			}
+		}
+	}
+}
+	return array;
+};
+
+tests({
+  'It should return the array.': function() {
+  	var testArray = ['March', 'Jan', 'Feb', 'Dec'];
+
+  	result = sort(testArray);
+
+  	eq(testArray, result);
+  },
+  'If no compareFunction is given, the array elements are converted to strings and sorted based on unicode value.': function() {
+  	var testArray = [1, 30, 4, 21, 100000];
+
+  	sort(testArray);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 100000);
+  	eq(testArray[2], 21);
+  	eq(testArray[3], 30);
+  	eq(testArray[4], 4);
+  },
+  'If no compareFunction is given, all undefined elements are sorted to the end of the array.': function() {
+  	var testArray = [1, undefined, 10000, undefined, 5];
+
+  	sort(testArray);
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 10000);
+  	eq(testArray[2], 5);
+  	eq(testArray[3], undefined);
+  	eq(testArray[4], undefined);
+  },
+  'It should work with function expressions.': function() {
+  	var testArray = [4, 2, 5, 1, 3];
+
+  	sort(testArray, function(a, b){
+  		return a - b;
+  	});
+
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+  },
+  'If compareFunction is given, all undefined elements are sorted to the end of the array WITHOUT calling compareFunction.': function() {
+  	var testArray = [4, undefined, 1, undefined, 9, 5];
+  	var testArray2 = [4, 3, 1, 10, 9, 5];
+  	var callbackCounter = 0;
+  	var callbackCounter2 =0;
+
+  	sort(testArray, function(a, b){
+  		callbackCounter++;
+  		return a - b;
+  	});
+
+  	sort(testArray2, function(a, b){
+  		callbackCounter2++;
+  		return a - b;
+  	});
+
+  	// Comparing number of times callback is used between two arrays(one with undefineds, one without)
+  	// This is a weak test, but I can't think of a way to do it better.
+  	eq(callbackCounter < callbackCounter2, true);
+  	eq(callbackCounter, 9);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 4);
+  	eq(testArray[2], 5);
+  	eq(testArray[3], 9);
+  	eq(testArray[4], undefined);
+  	eq(testArray[5], undefined);
+  },
+  'It should be able to sort objects on an array': function() {
+	var items = [
+	  { name: 'Edward', value: 21 },
+	  { name: 'Sharpe', value: 37 },
+	  { name: 'And', value: 45 },
+	  { name: 'The', value: -12 },
+	  { name: 'Magnetic', value: 13 },
+	  { name: 'Zeros', value: 37 }
+	];
+
+	sort(items, function(a, b){
+		return a.value - b.value;
+	});
+
+	eq(items[0].value, -12);
+	eq(items[1].value, 13);
+	eq(items[2].value, 21);
+	eq(items[3].value, 37);
+	eq(items[3].name, 'Sharpe');
+	eq(items[4].value, 37);
+	eq(items[4].name, 'Zeros');
+	eq(items[5].value, 45);
+  }, 
+  'It should be able to sort non-ASCII characters': function () {
+  	var items = ['réservé', 'premier', 'cliché', 'communiqué', 'café', 'adieu'];
+	
+	sort(items, function (a, b) {
+  	return a.localeCompare(b);
+	});
+
+	eq(items[0], 'adieu');
+	eq(items[1], 'café');
+	eq(items[2], 'cliché');
+	eq(items[3], 'communiqué');
+	eq(items[4], 'premier');
+	eq(items[5], 'réservé');
+  }
+});
+</script>

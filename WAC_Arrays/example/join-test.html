@@ -1,0 +1,132 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The join() method creates and returns a new string by concatenating all of the elements 
+// 				in an array (or an array-like object), separated by commas or a specified separator string. 
+// 				If the array has only one item, then that item will be returned without using the separator.
+
+// MDN Example: Array.join()
+// 			    arr.join([separator])
+
+// My function signature
+//function join (array[, seperator]){};
+
+function join (array, separator){
+	var newString = '';
+	var setSeparator = ',';
+
+	if (array.length === 0){
+		return newString;
+	}
+
+	if(arguments.length > 1){
+		if(typeof separator === 'string')
+		{
+			setSeparator = separator;
+		}
+		else
+		{
+			setSeparator = String(separator);
+		}
+	}
+
+	for (var i = 0; i < array.length; i++){
+		if(array[i] === undefined || array[i] === null){ //If undefined or null, set element to empty string
+			var element = '';
+		}
+		else{ //otherwise set element to array[i] element
+			var element = array[i];
+		}
+
+		if(i === array.length -1){
+			newString += element;
+		}
+		else {
+			newString += element + setSeparator;
+		}
+	}
+
+	return newString;
+};
+
+tests({
+  'It should return a string.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray);
+
+  	eq(typeof result === 'string', true);
+  },
+  'If array.length is 0, it should return an empty string.': function() {
+  	var testArray = [];
+
+  	var result = join(testArray);
+
+  	eq(result, '');
+  },
+    'It should accept an optional separator parameter.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray, '-');
+
+  	eq(result, 'one-two-three');
+  },
+  'The separator should be a comma by default.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray);
+
+  	eq(result, 'one,two,three');
+  },
+  'It should concatenate all the elements in an array.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray, ',');
+
+  	eq(result, 'one,two,three');
+  },
+  'It should concatenate all the elements in an array like object.': function() {
+  	var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    var result = join(arrayLikeObj);
+
+    eq(result, 'first,true,last!');
+  },
+  'The seperator should be a string, its value will be converted to one if necessary.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray, true);
+  	var result2 = join(testArray, NaN);
+  	var result3 = join(testArray, false);
+
+  	eq(result, 'onetruetwotruethree');
+  	eq(result2, 'oneNaNtwoNaNthree');
+  	eq(result3, 'onefalsetwofalsethree');
+  },
+  'If the separator is an empty string, all elements are joined without spaces between them.': function() {
+  	var testArray = ['one', 'two', 'three'];
+
+  	var result = join(testArray, '');
+
+  	eq(result, 'onetwothree');
+  },
+  'If the array has only one item, then it will return that item without a seperator.': function() {
+  	var testArray = ['one'];
+
+  	var result = join(testArray);
+
+  	eq(result, 'one');
+  },
+  'If an element is undefined or null, it is converted into an empty string.': function() {
+  	var testArray = ['one', null, 'three', undefined, 'five'];
+
+  	var result = join(testArray);
+
+  	eq(result, 'one,,three,,five');
+  }
+});
+</script>

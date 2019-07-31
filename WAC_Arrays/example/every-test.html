@@ -1,0 +1,159 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The every() method tests whether all elements in the array pass the test implemented by the provided function. 
+//				   It returns a Boolean value. 
+
+// MDN Example: Array.every()
+//				arr.every(callback(element[, index[, array]])[, thisArg])
+
+
+// My function signature
+// function every(array, callback [, optionalThis]) {
+// 	callback(element [, index [, array]]);
+// };
+
+function every (array, callback, optionalThis) {
+	var arrayLength = array.length;
+	var everyCallback = callback;
+
+	if (optionalThis){
+		everyCallback = everyCallback.bind(optionalThis);
+	}
+
+	for (var i = 0; i < arrayLength; i++) {
+		if (i in array) // Ignore indexes that don't exist
+    {
+  		 if (!everyCallback(array[i], i, array))
+  		{
+  			return false; // stop function because test failed
+  		}
+    }
+	}
+
+	return true;
+};
+
+tests({
+  'It should pass in the ith element as the first argument to the callback': function() {
+  	every([1], function (element) {
+	  		eq(element, 1);
+	  	});
+   },
+  'It should pass in the ith index as the second argument to the callback': function() {
+  	every([1], function (element, position) {
+	  		eq(position, 0);
+	  	});  	
+   },
+  'It should pass in the original array as the third argument to the callback': function() {
+  	var testArray = [1, 2, 3];
+  		find(testArray, function () {
+  			eq(testArray, originalArray);
+  		});
+   },
+  'It should accept an optional this object.': function() {
+  	every([], function() {
+    		eq(this.description, 'This is an optional object');
+    	}, {description: 'This is an optional object'});
+   },
+  'It should run the callback function array.length times if every element has a value and passes test.': function() {
+   	var testArray = [1, 2, 3, 4, 5];
+   	var testArrayLength = testArray.length;
+   	var callBackCounter = 0;
+
+   	every(testArray, function (element){
+   		callBackCounter ++;
+   		return element < 6;
+   	});
+
+   	eq(testArrayLength, callBackCounter);
+    },
+  'It should return true if every element in the array passes test.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var everyTest = every(testArray, function (element){
+  		return element < 6;
+  	});
+
+  	eq(everyTest, true);
+   },
+  'It should return false if any element in the array does NOT pass test.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var everyTest = every(testArray, function (element){
+  		return element < 5;
+  	});
+  	
+  	eq(everyTest, false);
+   },
+  'It should return true for any test put on an empty array.': function() {
+  	var testArray = [];
+
+  	var everyTest = every(testArray, function (element){
+  		return element > 5; // every function should basically ignore this test because testArray is empty.
+  	});
+
+  	eq(everyTest, true);
+   },
+  'It should invoke callback ONLY for indexes with assigned values.': function() {
+   	var testArray = [ undefined, 2, , 4, 5];
+   	var callBackCounter = 0;
+
+   	every(testArray, function (){
+   		callBackCounter ++;
+   		return true;
+   	});
+
+   	eq(callBackCounter, 4);
+    },
+  'It should NOT mutate the array on which is it called.': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	every(testArray, function(){});
+
+  	eq(testArray.length, 5);
+  	eq(testArray[0], 1);
+  	eq(testArray[1], 2);
+  	eq(testArray[2], 3);
+  	eq(testArray[3], 4);
+  	eq(testArray[4], 5);
+   },
+  'It should NOT run on elements that are appended after every is called.': function() {
+    var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	every(testArray, function(element, position, array) {
+  		testArray.push(8);
+  		callbackCounter ++;
+  		return element < 10;
+  	});
+  	
+  	eq(testArray[5], 8);
+  	eq(callbackCounter, 5);
+    },
+  'If an existing and unvisted element is changed by callback, then its value will be the given value at the time find visits its index.': function() {
+    var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	every(testArray, function(element, position, array){
+  		if (position === 0) {
+  			testArray.splice(3, 1, 'four');
+  		}
+  	});
+
+  	eq(testArray[3], 'four');
+    },
+  'It should NOT visit elements in the array that are deleted.': function() {
+    var testArray = [1, 2, 3, 4, 5];
+  	var callbackCounter = 0;
+  	every(testArray, function(element, position, array){
+  		if (position === 0) {
+  			delete testArray[3];
+  		}
+  		callbackCounter ++;
+  		return true;
+  	});
+
+  	eq(callbackCounter, 4);
+  	eq(testArray[3], undefined);
+    }
+});
+</script>

@@ -1,0 +1,69 @@
+<script src="../simpletest.js"></script>
+<script>
+
+// MDN Definition: The pop() method removes the last element from an array and returns that element. 
+//				   This method changes the length of the array.
+
+// MDN Example: Array.pop()
+
+// My function signature
+//function pop(array){};
+
+function pop (array){
+	var lastIndex = array.length - 1;
+	var lastElement = array[lastIndex];
+
+	if(array.length === 0){
+		return undefined;
+	}	
+
+	delete array[lastIndex];
+	array.length --;
+	return lastElement;
+};
+
+tests({
+  'It should remove the last element from the array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	pop(testArray);
+
+  	//eq(testArray.length, 4);
+  	eq(testArray[4], undefined);
+  },
+  'It should return the element that was removed from the array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	var result = pop(testArray);
+
+  	eq(result, 5);
+  },
+  'If the array given is empty, it should return undefined': function() {
+  	var testArray = [];
+
+  	var result = pop(testArray);
+
+  	eq(result, undefined);
+  },
+  'It should change the length of the array': function() {
+  	var testArray = [1, 2, 3, 4, 5];
+
+  	pop(testArray);
+
+  	eq(testArray.length, 4);
+  },
+  'It should accept object like arrays': function() {
+  	var arrayLikeObj = {
+      length: 3,
+      0: "first",
+      1: true,
+      2: "last!"};
+
+    var result = pop(arrayLikeObj);
+
+    eq(arrayLikeObj.length, 2);
+    eq(result, 'last!');
+    eq(arrayLikeObj[2], undefined);
+  }
+});
+</script>
